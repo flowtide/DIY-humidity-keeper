@@ -1,23 +1,26 @@
 import { IUser } from '@entities/User';
-
+import { knex } from '@daos/Instance'
+import Debug from "debug"
+const debug = Debug("humidity-keeper:users")
+const uuid = require('uuid')
 
 export interface IUserDao {
-    getOne: (email: string) => Promise<IUser | null>;
+    getOne: (id: string) => Promise<IUser | null>;
     getAll: () => Promise<IUser[]>;
     add: (user: IUser) => Promise<void>;
     update: (user: IUser) => Promise<void>;
-    delete: (id: number) => Promise<void>;
+    delete: (id: string) => Promise<void>;
 }
 
 class UserDao implements IUserDao {
 
 
     /**
-     * @param email
+     * @param id
      */
-    public async getOne(email: string): Promise<IUser | null> {
-        // TODO
-        return [] as any;
+    public async getOne(id: string): Promise<IUser | null> {
+        let users = await knex.select().from('users').where('id', id)
+        return users.length > 0 ? users.length[0] : null as any;
     }
 
 
@@ -25,8 +28,8 @@ class UserDao implements IUserDao {
      *
      */
     public async getAll(): Promise<IUser[]> {
-        // TODO
-        return [] as any;
+        let users = await knex.select().from('users')
+        return users as any;
     }
 
 
@@ -35,8 +38,10 @@ class UserDao implements IUserDao {
      * @param user
      */
     public async add(user: IUser): Promise<void> {
-        // TODO
-        return {} as any;
+        if (!user.id)
+            user.id = uuid.v4()
+        let users = await knex('users').insert(user)
+        return user as any;
     }
 
 
@@ -45,7 +50,7 @@ class UserDao implements IUserDao {
      * @param user
      */
     public async update(user: IUser): Promise<void> {
-        // TODO
+        await knex('users').where('id', user.id).update(user)
         return {} as any;
     }
 
@@ -54,8 +59,8 @@ class UserDao implements IUserDao {
      *
      * @param id
      */
-    public async delete(id: number): Promise<void> {
-        // TODO
+    public async delete(id: string): Promise<void> {
+        await knex('users').where('id',id).delete()
         return {} as any;
     }
 }

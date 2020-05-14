@@ -1,24 +1,40 @@
 export interface IUser {
-    id: number;
-    name: string;
-    email: string;
+    id: string
+    userId: string
+    password: string
+    name: string
+    email: string
+    created: Date
+    isAdmin: boolean
 }
 
 class User implements IUser {
 
-    public id: number;
-    public name: string;
-    public email: string;
+    public id: string
+    public userId: string
+    public name: string
+    public email: string
+    public created: Date
+    public password: string
+    public isAdmin: boolean
 
-    constructor(nameOrUser: string | IUser, email?: string, id?: number) {
-        if (typeof nameOrUser === 'string') {
-            this.name = nameOrUser;
-            this.email = email || '';
-            this.id = id || -1;
+    constructor(user: null | IUser) {
+        if (user === null) {
+            this.id = ''
+            this.userId = ''
+            this.name = ''
+            this.email = ''
+            this.created = new Date()
+            this.password = ''
+            this.isAdmin = false
         } else {
-            this.name = nameOrUser.name;
-            this.email = nameOrUser.email;
-            this.id = nameOrUser.id;
+            this.id = user.id
+            this.userId = user.userId
+            this.name = user.name
+            this.email = user.email
+            this.created = user.created
+            this.password = user.password
+            this.isAdmin = user.isAdmin
         }
     }
 }
