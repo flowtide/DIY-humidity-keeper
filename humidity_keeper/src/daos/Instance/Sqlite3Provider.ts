@@ -27,8 +27,34 @@ export async function create () {
   try {
     // Verify the connection before proceeding
     //await knex.raw('SELECT date("now")')
+    if (!(await knex.schema.hasTable('devices'))) {
+      debug("table creating: 'devices'")
+      await knex.schema.createTable('devices', (table) => {
+        table.uuid('id').notNullable().primary()
+        table.string('name').notNullable()          // product serial number
+        table.string('desc')
+        table.string('address')
+        table.integer('signal').defaultTo(-1)
+        table.integer('battery').defaultTo(-1)
+        table.dateTime('registerAt')
+        table.dateTime('updateAt')
+      })
+    }
 
-    if (! (await knex.schema.hasTable('users'))) {
+    if (!(await knex.schema.hasTable('readings'))) {
+      debug("table creating: 'readings'")
+      await knex.schema.createTable('readings', (table) => {
+        table.dateTime('created').notNullable()
+        table.uuid('deviceId').notNullable()
+        table.float('temperature')
+        table.float('humidity')
+        table.float('battery')
+        table.unique(['created', 'deviceId'])
+        table.foreign('deviceId').references('devices.id')
+      })
+    }
+
+    if (!(await knex.schema.hasTable('users'))) {
       debug("table creating: 'users'")
       await knex.schema.createTable('users', (table) => {
         table.uuid('id').notNullable().primary()
@@ -37,11 +63,11 @@ export async function create () {
         table.string('name').notNullable()
         table.string('email').defaultTo('')
         table.string('password').defaultTo('')
-        table.boolean('isAdmin').defaultTo(false) // is admin user
+        table.boolean('isAdmin').defaultTo(false)
         table.unique(['userId'])
       })
 
-      await knex('users').insert({   // 테이블 생성시 기본 관리자 계정 추가
+      await knex('users').insert({ 
         id: uuidv4(),
         created: new Date(),
         userId: 'admin',

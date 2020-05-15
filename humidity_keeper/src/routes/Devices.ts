@@ -2,69 +2,62 @@ import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { ParamsDictionary } from 'express-serve-static-core';
 
-//import UserDao from '@daos/User/UserDao.mock';
-import UserDao from '@daos/User/UserDao';
+import DeviceDao from '@daos/Device/DeviceDao';
 import { paramMissingError } from '@shared/constants';
 
-// Init shared
 const router = Router();
-const userDao = new UserDao();
+const deviceDao = new DeviceDao();
 
 
 /******************************************************************************
- *                      Get All Users - "GET /api/users/all"
+ *                      Get All Devices - "GET /api/devices/all"
  ******************************************************************************/
 
 router.get('/all', async (req: Request, res: Response) => {
-    const users = await userDao.getAll();
-    return res.status(OK).json({ data: users });
+    const devices = await deviceDao.getAll();
+    return res.status(OK).json({data: devices});
 });
 
-router.get('/get/:id', async (req: Request, res: Response) => {
-    const { id } = req.params as ParamsDictionary;
-    const user = await userDao.getOne(id);
-    return res.status(OK).json({ data: user });
-});
 
 /******************************************************************************
- *                       Add One - "POST /api/users/add"
+ *                       Add One - "POST /api/devices/add"
  ******************************************************************************/
 
 router.post('/add', async (req: Request, res: Response) => {
-    const { user } = req.body;
-    if (!user) {
+    const { device } = req.body;
+    if (!device) {
         return res.status(BAD_REQUEST).json({
             error: paramMissingError,
         });
     }
-    const newUser = await userDao.add(user);
-    return res.status(CREATED).json({ data: newUser });
+    const addedDevice = await deviceDao.add(device);
+    return res.status(CREATED).json({data: addedDevice});
 });
 
 
 /******************************************************************************
- *                       Update - "PUT /api/users/update"
+ *                       Update - "PUT /api/devices/update"
  ******************************************************************************/
 
 router.put('/update', async (req: Request, res: Response) => {
-    const { user } = req.body;
-    if (!user) {
+    const { device } = req.body;
+    if (!device) {
         return res.status(BAD_REQUEST).json({
             error: paramMissingError,
         });
     }
-    const result = await userDao.update(user);
+    const result = await deviceDao.update(device);
     return res.status(OK).json({ data: result });
 });
 
 
 /******************************************************************************
- *                    Delete - "DELETE /api/users/delete/:id"
+ *                    Delete - "DELETE /api/devices/delete/:id"
  ******************************************************************************/
 
 router.delete('/delete/:id', async (req: Request, res: Response) => {
     const { id } = req.params as ParamsDictionary;
-    const result = await userDao.delete(id);
+    const result = await deviceDao.delete(id);
     return res.status(OK).json({ data: result });
 });
 

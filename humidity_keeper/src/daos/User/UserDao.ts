@@ -2,7 +2,7 @@ import { IUser } from '@entities/User';
 import { knex } from '@daos/Instance'
 import Debug from "debug"
 const debug = Debug("humidity-keeper:users")
-const uuid = require('uuid')
+import { v4 as uuidv4 } from 'uuid'
 
 export interface IUserDao {
     getOne: (id: string) => Promise<IUser | null>;
@@ -39,8 +39,8 @@ class UserDao implements IUserDao {
      */
     public async add(user: IUser): Promise<void> {
         if (!user.id)
-            user.id = uuid.v4()
-        let users = await knex('users').insert(user)
+            user.id = uuidv4()
+        await knex('users').insert(user)
         return user as any;
     }
 
