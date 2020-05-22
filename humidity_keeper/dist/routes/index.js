@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const express_1 = require("express");
+const Auth_1 = tslib_1.__importDefault(require("./Auth"));
+const Users_1 = tslib_1.__importDefault(require("./Users"));
+const Devices_1 = tslib_1.__importDefault(require("./Devices"));
+const Readings_1 = tslib_1.__importDefault(require("./Readings"));
+const Actuator_1 = tslib_1.__importDefault(require("./Actuator"));
+const router = express_1.Router();
+router.use('/auth', Auth_1.default);
+router.use('/users', Users_1.default);
+router.use('/devices', Devices_1.default);
+router.use('/readings', Readings_1.default);
+router.use('/actuators', Actuator_1.default);
+exports.default = router;
