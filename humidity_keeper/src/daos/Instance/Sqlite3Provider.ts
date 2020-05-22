@@ -31,11 +31,10 @@ export async function create () {
       debug("table creating: 'devices'")
       await knex.schema.createTable('devices', (table) => {
         table.uuid('id').notNullable().primary()
-        table.string('name').notNullable()          // product serial number
+        table.string('name').notNullable()
         table.string('desc')
         table.string('address')
-        table.integer('signal').defaultTo(-1)
-        table.integer('battery').defaultTo(-1)
+        table.integer('type').defaultTo(0)      // device type=> 0: sensor, 1: actuator
         table.dateTime('registerAt')
         table.dateTime('updateAt')
       })

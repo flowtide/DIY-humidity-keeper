@@ -28,6 +28,10 @@ export namespace Server {
   export const isDev = process.env.NODE_ENV === 'development'
 }
 
+export namespace API {
+  export const authSecret : string = process.env.AUTH_SECRET || "My.Secret.1234"
+}
+
 export namespace Knex {
   export const config = {
     client: Database.driver,
@@ -49,4 +53,4 @@ export namespace Knex {
   }
 }
 
-export default {Database, Server, Knex}
+export default {Database, Server, API, Knex}

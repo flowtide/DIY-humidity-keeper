@@ -3,7 +3,7 @@ export interface IDevice {
     name: string
     desc: string
     address: string
-    battery: number
+    type: number
     registerAt: Date | null
     updateAt: Date | null
 }
@@ -14,7 +14,7 @@ class Device implements IDevice {
     public name: string
     public desc: string
     public address: string
-    public battery: number
+    public type: number
     public registerAt: Date | null
     public updateAt: Date | null
 
@@ -24,7 +24,7 @@ class Device implements IDevice {
             this.name = ''
             this.address = ''
             this.desc = ''
-            this.battery = -1
+            this.type = 0
             this.registerAt = null
             this.updateAt = null
         } else {
@@ -32,7 +32,7 @@ class Device implements IDevice {
             this.name = device.name
             this.address = device.address
             this.desc = device.desc
-            this.battery = device.battery
+            this.type = device.type
             this.registerAt = device.registerAt
             this.updateAt = device.updateAt
         }

@@ -1,7 +1,7 @@
 import './LoadEnv'; // Must be the first import
 import app from '@server';
 import logger from '@shared/Logger';
-import {Database} from './Config'
+import {Database, Server} from './Config'
 import {openDatabase} from '@daos/Instance'
 import Debug from "debug";
 const debug = Debug("humidity-keeper:index");
@@ -21,9 +21,8 @@ dbHandle.then((knexInstance) => {
         debug('DB ACCESS CHECKING: numUsers=', numUsers)
     })
 
-    const port = Number(process.env.PORT || 3000);
-    app.listen(port, () => {
-        logger.info('Express server started on port: ' + port);
+    app.listen(Server.port, () => {
+        logger.info(`Web server started on port: ${Server.port}`);
     })
 }).catch((error) => {
     logger.error('app error:', error)    
