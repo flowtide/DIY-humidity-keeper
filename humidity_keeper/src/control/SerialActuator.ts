@@ -9,7 +9,13 @@ let em = new events.EventEmitter()
 
 async function readAsync() : Promise<void> {
   const promise = new Promise<void>((resolve, reject) => {
+    var timeoutTimer = setTimeout(() => {
+      debug('Serial timeout')
+      throw new Error('Serial Port Timeout')
+    }, 1000)
     em.once('dataReady', (data) => {
+      clearTimeout(timeoutTimer)
+      debug('resolve:', data)
       resolve(data)
     })
   })
@@ -17,34 +23,35 @@ async function readAsync() : Promise<void> {
 }
 
 class SerialActuator {
-    private port: SerialPort
-    private parser: any
+  private port: SerialPort
+  private parser: any
 
-    constructor(devicePort: string, baudRate: number) {
-        debug(`SerialPort open: port=${devicePort} baudRate=${baudRate}`)
-        this.port = new SerialPort(devicePort, { baudRate: baudRate, dataBits: 8, stopBits: 1, parity: 'none' })
-        this.parser = this.port.pipe(new Readline({ delimiter: '\r' }))
-        debug('open ok')
-        this.parser.on('data', (data:any) => {
-            debug('Serial Data: ', data)
-            em.emit('dataReady', data)
-        })
+  constructor(devicePort: string, baudRate: number) {
+    debug(`SerialPort open: port=${devicePort} baudRate=${baudRate}`)
+    this.port = new SerialPort(devicePort, { baudRate: baudRate, dataBits: 8, stopBits: 1, parity: 'none' })
+    this.parser = this.port.pipe(new Readline({ delimiter: '\r' }))
+    debug('open ok')
+    this.parser.on('data', (data:any) => {
+        debug('Serial Data: ', data)
+        em.emit('dataReady', data)
+    })
 
-        setTimeout(() => {
-          debug('Send test message to port')
-          this.port.write('date\r\n')
-        }, 500)
-    }
+    //setTimeout(() => {
+    //  debug('Send test message to port')
+    //  this.port.write('date\r\n')
+    //}, 500)
+  }
 
-    public async write(command:string): Promise<void> {
-      debug(`SerialPort write: ${command}`)
-      this.port.write(command)
-      return readAsync()
-    }
+  public async write(command:string): Promise<void> {
+    debug(`SerialPort write: ${command}`)
+    this.port.write(command)
+    return readAsync()
+  }
 
-    public close(): void {
-        this.port.close()
-    }
+  public close(): void {
+    if (this.port.isOpen)
+      this.port.close()
+  }
 }
 
 export default SerialActuator

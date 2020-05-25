@@ -33,16 +33,16 @@
             <b-icon icon='wifi' aria-hidden='true'></b-icon> 리모컨 파워키 전송
           </b-button>
           <br>
-          <b-button v-if="device.type==1" class="m-1" v-on:click="goReadingDataPage(device.id)" variant="success">
+          <b-button v-if="device.type==1" class="m-1" v-on:click="readLightStatus(device.address)" variant="success">
             <b-icon icon='octagon-half' aria-hidden='true'></b-icon> 경광등 상태 읽기
           </b-button>
           <b-icon v-show="device.type==1&&lightStatus==-1" icon='x' aria-hidden='true'></b-icon>
           <b-icon v-show="device.type==1&&lightStatus==0" icon='circle' aria-hidden='true'></b-icon>
           <b-icon v-show="device.type==1&&lightStatus==1" icon='circle-fill' aria-hidden='true'></b-icon>
-          <b-button v-if="device.type==1" class="m-1" v-on:click="goReadingDataPage(device.id)" variant="success">
+          <b-button v-if="device.type==1" class="m-1" v-on:click="writeLightStatus(device.address, false)" variant="success">
             <b-icon icon='toggle-off' aria-hidden='true'></b-icon> 경광등 끄기
           </b-button>
-          <b-button v-if="device.type==1" class="m-1" v-on:click="goReadingDataPage(device.id)" variant="success">
+          <b-button v-if="device.type==1" class="m-1" v-on:click="writeLightStatus(device.address, true)" variant="danger">
             <b-icon icon='toggle-on' aria-hidden='true'></b-icon> 경광등 켜기
           </b-button>
           <b-card-text v-if="device.type==0" v-show="!device.reading">센서 데이터 없음</b-card-text>
@@ -121,17 +121,75 @@ export default {
     async sendIRPowerKey(address) {
       this.loading = true
       try {
-        let message = { address: address, text: 'date', crlf: true }
+        let message = { address: address, text: 'ir.NEC 40FF00FF\r'}
         console.log('SEND', message)
         let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
         if (res.data.error) {
           alert('Update error: ' + res.data.error.message)
         } else {
           console.log('serial response:', res.data.data)
+          // output 형식: 200 40FF00FF
+          let match = res.data.data.match(/(\d+) (.+)/)
+          if (match[1] == 200) {
+          } else {
+            alert('키 전송 실패: ' + match[0])
+          }
         }
       }
       catch (error) {
         console.log(error)
+        alert('Request Error: ' + error.message)
+      }
+      this.loading = false
+    },
+
+    async readLightStatus(address) {
+      this.loading = true
+      try {
+        let message = { address: address, text: 'gpio.get 12\r' }
+        console.log('SEND', message)
+        let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
+        if (res.data.error) {
+          this.llightStatus = -1
+          alert('Update error: ' + res.data.error.message)
+        } else {
+          // output 형식: 200 [0|1]
+          let match = res.data.data.match(/(\d+) (.+)/)
+          if (match[1] == 200) {
+            this.lightStatus = parseInt(match[2])
+          } else {
+            alert('경광등 상태 읽기 실패: ' + match[0])
+            this.lightStatus = -1
+          }
+        }
+      }
+      catch (error) {
+        alert('Request Error: ' + error.message)
+      }
+      this.loading = false
+    },
+
+    async writeLightStatus(address, isOn) {
+      this.loading = true
+      try {
+        let message = { address: address, text: isOn ? 'gpio.high 12\r' : 'gpio.low 12\r' }
+        console.log('SEND', message)
+        let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
+        if (res.data.error) {
+          this.llightStatus = -1
+          alert('Update error: ' + res.data.error.message)
+        } else {
+          // output 형식: 200 [0|1]
+          let match = res.data.data.match(/(\d+) (.+)/)
+          if (match[1] == 200) {
+            this.lightStatus = parseInt(match[2])
+          } else {
+            alert('경광등 상태 쓰기 실패: ' + match[0])
+            this.lightStatus = -1
+          }
+        }
+      }
+      catch (error) {
         alert('Request Error: ' + error.message)
       }
       this.loading = false

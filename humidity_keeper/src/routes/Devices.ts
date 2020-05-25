@@ -17,7 +17,7 @@ const router = Router()
 const deviceDao = new DeviceDao()
 const readingDao = new ReadingDao()
 
-const serialBaudRate = 115200
+const serialBaudRate = 9600
 
 async function openAllActuators() {
   const devices = await deviceDao.getAll()

@@ -1,3 +1,5 @@
+import Debug from "debug"
+const debug = Debug("humidity-keeper:serial-actuator")
 import SerialActuator from './SerialActuator'
 
 let actuators = {}
@@ -11,12 +13,11 @@ export function DeviceClose(portNumber: string) {
   delete actuators[portNumber]
 }
 
-export async function DeviceWrite(portNumber: string, data: string, crlf: boolean) {
+export async function DeviceWrite(portNumber: string, data: string) {
   if (!DeviceIsExist(portNumber))
     throw new Error(`Actuator port not opened: ${portNumber}`)
-  if (crlf)
-    data += '\r'
-  let result = actuators[portNumber].write(data)
+  let result = await actuators[portNumber].write(data)
+  debug('result:', result)
   return result
 }
 
