@@ -14,7 +14,7 @@ const debug = debug_1.default("humidity-keeper:devices");
 const router = express_1.Router();
 const deviceDao = new DeviceDao_1.default();
 const readingDao = new ReadingDao_1.default();
-const serialBaudRate = 115200;
+const serialBaudRate = 9600;
 function openAllActuators() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const devices = yield deviceDao.getAll();

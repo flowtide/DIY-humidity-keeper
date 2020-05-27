@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceIsExist = exports.DeviceWrite = exports.DeviceClose = exports.DeviceOpen = void 0;
 const tslib_1 = require("tslib");
+const debug_1 = tslib_1.__importDefault(require("debug"));
+const debug = debug_1.default("humidity-keeper:serial-actuator");
 const SerialActuator_1 = tslib_1.__importDefault(require("./SerialActuator"));
 let actuators = {};
 function DeviceOpen(portNumber, baudRate) {
@@ -13,13 +15,12 @@ function DeviceClose(portNumber) {
     delete actuators[portNumber];
 }
 exports.DeviceClose = DeviceClose;
-function DeviceWrite(portNumber, data, crlf) {
+function DeviceWrite(portNumber, data) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (!DeviceIsExist(portNumber))
             throw new Error(`Actuator port not opened: ${portNumber}`);
-        if (crlf)
-            data += '\r';
-        let result = actuators[portNumber].write(data);
+        let result = yield actuators[portNumber].write(data);
+        debug('result:', result);
         return result;
     });
 }

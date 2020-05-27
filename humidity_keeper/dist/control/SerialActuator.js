@@ -10,7 +10,13 @@ let em = new events_1.default.EventEmitter();
 function readAsync() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const promise = new Promise((resolve, reject) => {
+            var timeoutTimer = setTimeout(() => {
+                debug('Serial timeout');
+                throw new Error('Serial Port Timeout');
+            }, 1000);
             em.once('dataReady', (data) => {
+                clearTimeout(timeoutTimer);
+                debug('resolve:', data);
                 resolve(data);
             });
         });
@@ -27,10 +33,6 @@ class SerialActuator {
             debug('Serial Data: ', data);
             em.emit('dataReady', data);
         });
-        setTimeout(() => {
-            debug('Send test message to port');
-            this.port.write('date\r\n');
-        }, 500);
     }
     write(command) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
@@ -40,7 +42,8 @@ class SerialActuator {
         });
     }
     close() {
-        this.port.close();
+        if (this.port.isOpen)
+            this.port.close();
     }
 }
 exports.default = SerialActuator;

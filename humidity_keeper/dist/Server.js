@@ -27,11 +27,6 @@ app.use((err, req, res, next) => {
         error: err.message,
     });
 });
-const viewsDir = path_1.default.join(__dirname, 'views');
-app.set('views', viewsDir);
-const staticDir = path_1.default.join(__dirname, 'public');
+const staticDir = path_1.default.join(__dirname, 'app-dist');
 app.use(express_1.default.static(staticDir));
-app.get('*', (req, res) => {
-    res.sendFile('index.html', { root: viewsDir });
-});
 exports.default = app;
