@@ -6,8 +6,8 @@
 
     <b-form @submit="onRuleSave" :disabled="form.isDisabled">
       <div class="m-3">
-        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 수정</h4>
-        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 추가</h4>
+        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 수정</h4>
+        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 추가</h4>
       </div>
 
       <b-card>
@@ -51,6 +51,7 @@
             &nbsp;
             <b-form-checkbox class="m-1 mx-3" 
             v-model="form.rule.ctrlLight" :disabled="form.isDisabled"
+            value="1" unchecked-value="0"
             required
             >
             경광등 제어
@@ -58,6 +59,7 @@
             &nbsp;
             <b-form-checkbox class="m-1"
             v-model="form.rule.ctrlPower" :disabled="form.isDisabled"
+            value="1" unchecked-value="0"
             required
             >
             가습기제어

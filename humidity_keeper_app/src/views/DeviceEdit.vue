@@ -6,8 +6,8 @@
 
     <b-form @submit="onDeviceSave" :disabled="form.isDisabled">
       <div class="m-3">
-        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 수정</h4>
-        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 추가</h4>
+        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 수정</h4>
+        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 추가</h4>
       </div>
 
       <b-card bg-variant="dark" >
