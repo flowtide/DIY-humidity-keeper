@@ -30,6 +30,7 @@ export interface RequestWithAuth extends Request {
 export const authenticate = (req: RequestWithAuth, res: Response, next: NextFunction) => {
   let token = <string>(req.headers['x-access-token'] || req.headers['authorization']) // Express headers are auto converted to lowercase
 
+  debug(`token=${token}`)
   if (token.startsWith('Bearer ')) {
     // Remove Bearer from string
     token = token.slice(7, token.length);

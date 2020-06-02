@@ -6,10 +6,11 @@ displayUsers();
 
 
 function displayUsers() {
-    httpGet('/api/users/all')
+    httpGet('/api/v1/users/all')
         .then(response => response.json())
         .then((response) => {
-            var allUsers = response.users;
+            console.log('data: ', response.data)
+            var allUsers = response.data;
             // Empty the anchor
             var allUsersAnchor = document.getElementById('all-users-anchor');
             allUsersAnchor.innerHTML = '';
@@ -28,6 +29,8 @@ function getUserDisplayEle(user) {
             <div>Id: ${user.id}</div>
             <div>Name: ${user.name}</div>
             <div>Email: ${user.email}</div>
+            <div>userId: ${user.userId}</div>
+            <div>Password: ${user.password}</div>
             <button class="edit-user-btn" data-user-id="${user.id}">
                 Edit
             </button>
@@ -42,6 +45,12 @@ function getUserDisplayEle(user) {
             </div>
             <div>
                 Email: <input class="email-edit-input" value="${user.email}">
+            </div>
+            <div>
+                userId: <input class="userid-edit-input" value="${user.userId}">
+            </div>
+            <div>
+                Password: <input class="password-edit-input" value="${user.password}">
             </div>
             <button class="submit-edit-btn" data-user-id="${user.id}">
                 Submit
@@ -78,15 +87,24 @@ document.addEventListener('click', function (event) {
 function addUser() {
     var nameInput = document.getElementById('name-input');
     var emailInput = document.getElementById('email-input');
+    var useridInput = document.getElementById('userid-input');
+    var passwordInput = document.getElementById('password-input');
     var data = {
         user: {
             name: nameInput.value,
-            email: emailInput.value
+            email: emailInput.value,
+            userid: useridInput.value,
+            password: passwordInput.value,
+            created: new Date(),
         },
     };
-    httpPost('/api/users/add', data)
+
+    httpPost('/api/v1/users/add', data)
         .then(() => {
             displayUsers();
+        })
+        .catch((err) => {
+            alert(err)
         })
 }
 
@@ -111,6 +129,8 @@ function submitEdit(ele) {
     var userEle = ele.parentNode.parentNode;
     var nameInput = userEle.getElementsByClassName('name-edit-input')[0];
     var emailInput = userEle.getElementsByClassName('email-edit-input')[0];
+    var useridInput = userEle.getElementsByClassName('userid-edit-input')[0];
+    var emailpasswordInputnput = userEle.getElementsByClassName('password-edit-input')[0];
     var id = ele.getAttribute('data-user-id');
     var data = {
         user: {
@@ -119,7 +139,7 @@ function submitEdit(ele) {
             id: id
         }
     };
-	httpPut('/api/users/update', data)
+	httpPut('/api/v1/users/update', data)
         .then(() => {
             displayUsers();
         })
@@ -128,7 +148,7 @@ function submitEdit(ele) {
 
 function deleteUser(ele) {
     var id = ele.getAttribute('data-user-id');
-	httpDelete('/api/users/delete/' + id)
+	httpDelete('/api/v1/users/delete/' + id)
         .then(() => {
             displayUsers();
         })

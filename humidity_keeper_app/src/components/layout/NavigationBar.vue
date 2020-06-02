@@ -20,6 +20,7 @@
             <em><b-icon icon="gear-fill" aria-hidden="true"></b-icon></em>
           </template>
           <b-dropdown-item to="/login" v-if="!isAuthenticated()"><b-icon icon="person" aria-hidden="true"></b-icon>로그인</b-dropdown-item>
+          <b-dropdown-item to="/user-edit" replace v-if="isAuthenticated()"><b-icon icon="power" aria-hidden="true"></b-icon>사용자정보</b-dropdown-item>
           <b-dropdown-item to="/logout" replace v-if="isAuthenticated()"><b-icon icon="power" aria-hidden="true"></b-icon>로그아웃</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>

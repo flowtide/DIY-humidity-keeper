@@ -52,7 +52,7 @@ export default new Vuex.Store({
   actions: {
     async initialLoad(context) {
       if (localStorage.authToken) {
-        console.log('check current user with token:', localStorage.authToken)
+        //console.log('check current user with token:', localStorage.authToken)
         Vue.axios.defaults.headers.common.Authorization = `Bearer ${localStorage.authToken}`
         const response = await Vue.axios.get("/api/v1/auth/current-user")
         if (response.data.error) {
@@ -61,20 +61,20 @@ export default new Vuex.Store({
         }
         context.commit("CURRENT_USER_FETCHED", response.data.data)
       } else {
+        /*
         var user = {}
         user.id = 1
         user.email = 'admin@test.com'
         user.name = 'test'
         context.commit("CURRENT_USER_FETCHED", user)
+        */
       }
     },
 
-    async login(context, userId, password) {
-      const response = await Vue.axios.post("/api/v1/user/login", {
-        userId: userId,
-        password: password
-      })
-      console.log('login response:', response.data)
+    async login(context, idPassword) {
+      console.log(`idPassword=${idPassword}`)
+      const response = await Vue.axios.post("/api/v1/auth/login", idPassword)
+      //console.log('login response:', response.data)
       if (response.data.error) {
         throw response.data.error.message
       }
@@ -82,7 +82,7 @@ export default new Vuex.Store({
         let user = response.data.data
         let token = response.data.token
         localStorage.setItem('authToken', token)
-        console.log('jwt:', token)
+        //console.log('jwt:', token)
         Vue.axios.defaults.headers.common.Authorization = `Bearer ${token}`
         context.commit("CURRENT_USER_FETCHED", user)
       }

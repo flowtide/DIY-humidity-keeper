@@ -4,22 +4,24 @@
       <div v-if="loading">
         <centered-loader />
       </div>
-      <div v-if="!loading && !error">
+      <div v-if="!loading">
         <b-container class="mt-3">
           <router-view />
         </b-container>
       </div>
+      <!--
       <div v-if="!loading && error">
         Login Failed: {{errorMessage}}
         <br>
         <b-button v-on:click="goLoginPage()">로그인 페이지로 이동</b-button>
       </div>
+      -->
   </div>
 </template>
 
 <script>
 import NavigationBar from "./components/layout/NavigationBar"
-import { mapActions } from "vuex"
+import { mapActions, mapState } from "vuex"
 
 export default {
   name: 'App',
@@ -31,6 +33,11 @@ export default {
       errorMessage: ''
     }
   },
+  computed: {
+    ...mapState([
+      'user'
+    ])
+  },
   methods: {
     ...mapActions(['initialLoad', 'logout']),
     setLoading(isLoading) {
@@ -39,7 +46,7 @@ export default {
     },
 
     goLoginPage() {
-      this.$router.replace('/login')
+      this.$router.push('/login')
     }
   },
   
