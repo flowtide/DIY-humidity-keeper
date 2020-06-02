@@ -6,8 +6,8 @@
 
     <b-form @submit="onDeviceSave" :disabled="form.isDisabled">
       <div class="m-3">
-        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 수정</h4>
-        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 장치 추가</h4>
+        <h4 v-if="isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 수정</h4>
+        <h4 v-if="!isEditMode"> <b-icon icon='gear-fill' aria-hidden='true'></b-icon> 규칙 추가</h4>
       </div>
 
       <b-card bg-variant="dark" >
@@ -20,14 +20,14 @@
             >
             </b-form-input>
           </b-input-group>
-          <b-input-group prepend="설 명" class="mb-2 mr-sm-2 mb-sm-2">
+          <b-input-group prepend="적용센서" class="mb-2 mr-sm-2 mb-sm-2">
             <b-form-input
             v-model="form.device.desc" :disabled="form.isDisabled"
             >
             </b-form-input>
           </b-input-group>
 
-          <b-input-group prepend="장치 타입" class="mb-2 mr-sm-2 mb-sm-2">
+          <b-input-group prepend="적용장치" class="mb-2 mr-sm-2 mb-sm-2">
             <b-form-select
               v-model="form.device.type"
               :options="deviceTypes"
@@ -37,6 +37,7 @@
           <b-input-group prepend="장치 주소" class="mb-2 mr-sm-2 mb-sm-2">
             <b-form-input
             v-model="form.device.address" :disabled="form.isDisabled"
+            description="센서 맥주소 또는 액추에이터 시리얼포트 장치 이름"
             >
             </b-form-input>
           </b-input-group>
@@ -139,14 +140,14 @@ export default {
     },
   },
   mounted () {
-    console.log('findDevice:', this.$route.params._id)
-    if (this.$route.params._id == 'new') {
+    console.log('findDevice:', this.$route.params.id)
+    if (this.$route.params.id == 'new') {
       this.form.device.name = ''
       this.form.device.desc = ''
       this.form.device.registerAt = new Date()
     }
     else {
-      this.device = this.$store.getters.findDevice(this.$route.params._id)
+      this.device = this.$store.getters.findDevice(this.$route.params.id)
       this.form.device = _.clone(this.device)
       this.isEditMode = true
     }

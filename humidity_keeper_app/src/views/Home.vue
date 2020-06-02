@@ -23,7 +23,7 @@
 
   <div v-if="!loading" class="devices-view-container">
     <br>
-    <b-row v-bind:key="device._id" v-for="device in devices">
+    <b-row v-bind:key="device.id" v-for="device in devices">
       <b-col xl="4" lg="6" md="12" sm="12">
         <b-card class="m-2" header-tag="header" footer-tag="footer" bg-variant="light">
           <template v-slot:header>
@@ -45,7 +45,9 @@
           <b-button v-if="device.type==1" class="m-1" v-on:click="writeLightStatus(device.address, true)" variant="danger">
             <b-icon icon='toggle-on' aria-hidden='true'></b-icon> 경광등 켜기
           </b-button>
-          <b-card-text v-if="device.type==0" v-show="!device.reading">센서 데이터 없음</b-card-text>
+          <b-card-text v-if="device.type==0 && !device.reading" v-show="!device.reading">센서 데이터 없음</b-card-text>
+          <b-card-text v-if="device.reading" v-show="device.reading">습도: {{device.reading.humidity}} 온도: {{device.reading.temperature}}</b-card-text>
+          <b-card-text v-if="device.reading" v-show="device.reading">{{formatUpdateAt(device.reading.created)}}</b-card-text>
           <template v-slot:footer>
             <b-button v-if="device.type==0" class="m-1" v-on:click="goReadingDataPage(device.id)" variant="info">
               <b-icon icon='table' aria-hidden='true'></b-icon>
@@ -66,6 +68,7 @@
 </template>
 <script>
 import { mapActions, mapState } from "vuex"
+import moment from 'moment'
 
 export default {
   name: 'devices',
@@ -77,7 +80,7 @@ export default {
       loading: false,
       timer: null,
       lightStatus: -1,
-      refreshInterval: 0,
+      refreshInterval: 30000,
       refreshIntervals: [
         { text: '자동 갱신 미사용', value: 0 },
         { text: '10초', value: 10000 },
@@ -101,9 +104,14 @@ export default {
         this.loading = true
 
       try {
-        await this.fetchDevices()
+        for (let device of this.devices) {
+          if (device.type == 0) {
+            let res = await this.axios.get('/api/v1/readings/recent-data?deviceId='+ device.id)
+            device.reading = res.data.data
+            //console.log(device.id, device.reading)
+          }
+        }
       } catch (error) {
-        console.log('fetchDevices error: ', error)
         clearInterval(this.timer)
       }
 
@@ -211,6 +219,13 @@ export default {
       this.$router.push('/device-edit/' + id)
     },
 
+    formatUpdateAt(updateAt) {
+      var mtime = moment(updateAt)
+      if (mtime.isAfter(moment().subtract(2, 'days')))
+        return mtime.fromNow() + ' 갱신됨' 
+      else
+        return mtime.format('MM-DD hh:mm') + ' 갱신됨' 
+    }
   },
   
   async mounted () {
@@ -219,6 +234,7 @@ export default {
     } catch (error) {
       console.log('fetchDevices error: ', error)
     }
+    setTimeout(() => this.refreshData(true), 100)
     this.checkRefreshTimer()
   },
   

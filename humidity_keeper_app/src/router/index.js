@@ -14,24 +14,24 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/device-edit/:_id',
-    name: 'DeviceEdit',
+    path: '/device-edit/:id',
+    name: 'deviceEdit',
     component: () => import('../views/DeviceEdit.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/reading-data/:_id',
-    name: 'ReadingData',
+    path: '/reading-data/:id',
+    name: 'readingData',
     component: () => import('../views/ReadingData.vue'),
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/reading-chart/:_id',
-    name: 'ReadingChart',
+    path: '/reading-chart/:id',
+    name: 'readingChart',
     component: () => import('../views/ReadingChart.vue'),
     meta: {
       requiresAuth: true
@@ -55,8 +55,24 @@ Vue.use(VueRouter)
   },
   {
     path: '/user-edit',
-    name: 'user',
+    name: 'userEdit',
     component: () => import('../views/UserEdit.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/rules',
+    name: 'rules',
+    component: () => import('../views/Rules.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/rule-edit/:id',
+    name: 'ruleEdit',
+    component: () => import('../views/RuleEdit.vue'),
     meta: {
       requiresAuth: true
     }

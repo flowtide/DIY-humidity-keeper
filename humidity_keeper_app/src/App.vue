@@ -39,7 +39,7 @@ export default {
     ])
   },
   methods: {
-    ...mapActions(['initialLoad', 'logout']),
+    ...mapActions(['initialLoad', 'fetchDevices', 'logout']),
     setLoading(isLoading) {
       console.log('setLoading', this.loading, '-->', isLoading)
       this.loading = isLoading
@@ -54,6 +54,7 @@ export default {
     console.log('App mounted')
     try {
       await this.initialLoad()
+      await this.fetchDevices()
       this.loading = false
     } catch (error) {
       console.log('initialLoad error: ', error)

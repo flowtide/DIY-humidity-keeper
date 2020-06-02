@@ -138,7 +138,7 @@ export default {
 
   },
   mounted () {
-    this.device = this.$store.getters.findDevice(this.$route.params._id)
+    this.device = this.$store.getters.findDevice(this.$route.params.id)
   }
 }
 </script>

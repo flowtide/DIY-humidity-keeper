@@ -53,6 +53,24 @@ export async function create () {
       })
     }
 
+    if (!(await knex.schema.hasTable('rules'))) {
+      debug("table creating: 'rules'")
+      await knex.schema.createTable('rules', (table) => {
+        table.uuid('id').notNullable().primary()
+        table.string('name').notNullable()
+        table.uuid('sensorId').notNullable()
+        table.uuid('actuatorId').notNullable()
+        table.float('humidityThreshold')
+        table.boolean('ctrlLight').defaultTo(false)
+        table.boolean('ctrlPower').defaultTo(false)
+        table.string('ctrlBegin')
+        table.string('ctrlEnd')
+        table.string('ctrlWeeks')  // 0: sunday, 1: monday.... -> get day of week: moment().day()
+        table.dateTime('ctrlAt')
+        table.foreign('sensorId').references('devices.id')
+      })
+    }
+
     if (!(await knex.schema.hasTable('users'))) {
       debug("table creating: 'users'")
       await knex.schema.createTable('users', (table) => {

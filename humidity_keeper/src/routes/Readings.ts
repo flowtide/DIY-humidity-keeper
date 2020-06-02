@@ -22,6 +22,12 @@ router.get('/all', async (req: Request, res: Response) => {
   return res.status(OK).json({data: readings})
 })
 
+router.get('/recent-data', async (req: Request, res: Response) => {
+  const { deviceId } = req.query
+  const reading = await readingDao.getRecent(deviceId as string)
+  return res.status(OK).json({data: reading})
+})
+
 
 /******************************************************************************
  *                    Delete - "DELETE /api/readings/delete-range
