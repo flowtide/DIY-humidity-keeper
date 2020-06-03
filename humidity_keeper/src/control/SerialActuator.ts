@@ -32,7 +32,7 @@ class SerialActuator {
     this.parser = this.port.pipe(new Readline({ delimiter: '\r' }))
     debug('open ok')
     this.parser.on('data', (data:any) => {
-        debug('Serial Data: ', data)
+        //debug('Serial Data: ', data)
         em.emit('dataReady', data)
     })
 

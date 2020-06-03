@@ -12,7 +12,7 @@ const userDao = new UserDao()
 
 function makeToken(user) {
   debug(`login userId=${user} API.authSecret=${API.authSecret}`)
-  return jwt.sign(user, API.authSecret, {expiresIn: '24h'}) // expires in 24 hours
+  return jwt.sign(user, API.authSecret, {expiresIn: '30 days'}) // expires in 30d
 }
 
 /******************************************************************************

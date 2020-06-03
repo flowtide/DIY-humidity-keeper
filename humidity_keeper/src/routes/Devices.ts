@@ -74,7 +74,9 @@ async function checkRules(reading: IReading, device: IDevice) {
     let lightOn = -1
     if (reading.humidity < rule.humidityThreshold) {
       lightOn = 1
-    } else if (reading.humidity + 3 > rule.humidityThreshold) {
+      debug(`lightOn humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
+    } else if (reading.humidity > rule.humidityThreshold + 4) {
+      debug(`lightOff humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
       lightOn = 0
     }
 
@@ -82,6 +84,7 @@ async function checkRules(reading: IReading, device: IDevice) {
       let isOn = (lightOn == 1)
       if (Control.DeviceNeedLightOnOff(actuatorDevice.address, isOn)) {
         Control.DeviceLightOnOff(actuatorDevice.address, isOn)
+        return  // 시리얼에 연속해서 보내면 안됨으로 Light 제어 수행하는 경우 바로 끝냄, 다음 리포트에 파워 제어 들어갈수 있음
       }
     }
   }
@@ -90,6 +93,20 @@ async function checkRules(reading: IReading, device: IDevice) {
     if (!isRuleActive(rule)) {
       debug(`Rule disabled: sensorId=${device.id}`)
       return
+    }
+
+    if (reading.humidity > rule.humidityThreshold) {
+      return
+    }
+    let checkMoment = Moment().subtract(20, 'hours')
+    let ctrlAt = Moment(rule.ctrlAt)
+    if (!ctrlAt.isValid() || checkMoment.isAfter(ctrlAt)) {
+      debug(`DeviceSendPowerKey ${ctrlAt.format()}`)
+      Control.DeviceSendPowerKey(actuatorDevice.address)
+      rule.ctrlAt = new Date()
+      ruleDao.update(rule)
+    } else {
+      //debug(`no deed to power off ${ctrlAt.format()}`)
     }
   }
 

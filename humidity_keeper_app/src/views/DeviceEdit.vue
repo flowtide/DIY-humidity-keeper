@@ -20,14 +20,14 @@
             >
             </b-form-input>
           </b-input-group>
-          <b-input-group prepend="적용센서" class="mb-2 mr-sm-2 mb-sm-2">
+          <b-input-group prepend="설명" class="mb-2 mr-sm-2 mb-sm-2">
             <b-form-input
             v-model="form.device.desc" :disabled="form.isDisabled"
             >
             </b-form-input>
           </b-input-group>
 
-          <b-input-group prepend="적용장치" class="mb-2 mr-sm-2 mb-sm-2">
+          <b-input-group prepend="장치 타입" class="mb-2 mr-sm-2 mb-sm-2">
             <b-form-select
               v-model="form.device.type"
               :options="deviceTypes"
