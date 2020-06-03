@@ -149,6 +149,7 @@ export default {
     else {
       this.device = this.$store.getters.findDevice(this.$route.params.id)
       this.form.device = _.clone(this.device)
+      delete this.form.device.reading
       this.isEditMode = true
     }
   }

@@ -97,6 +97,7 @@ export default new Vuex.Store({
     async fetchDevices(context) {
       const response = await Vue.axios.get("/api/v1/devices/all")
       context.commit("DEVICES_FETCHED", response.data.data)
+      return response.data.data
     }
   },
   modules: {

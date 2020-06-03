@@ -70,6 +70,7 @@
 <script>
 import { mapActions, mapState } from "vuex"
 import moment from 'moment'
+import _ from 'lodash'
 
 export default {
   name: 'devices',
@@ -78,6 +79,7 @@ export default {
  
  data() {
     return {
+      devices: [],
       loading: false,
       timer: null,
       lightStatusMap: {},
@@ -91,9 +93,9 @@ export default {
     }
   },
   computed: {
-    ...mapState([
-      'devices'
-    ])
+    //...mapState([
+    //  'devices'
+    //])
   },
   methods: {
     ...mapActions([
@@ -296,7 +298,8 @@ export default {
   
   async mounted () {
     try {
-      await this.fetchDevices()
+      let devices = await this.fetchDevices()
+      this.devices = _.clone(devices)
       for (let device of this.devices) {
         if (device.type == 1) {
           this.lightStatusMap[device.address] = -1
