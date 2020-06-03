@@ -15,4 +15,28 @@ router.post('/serial-write', async (req: RequestWithAuth, res: Response) => {
     return res.status(OK).json({ data: result })
 })
 
+router.post('/light-onoff', async (req: RequestWithAuth, res: Response) => {
+    const { message } = req.body
+    debug(`DeviceLightOnOff: ${message.address} -> ${message.isOn}`)
+    var result = await Control.DeviceLightOnOff(message.address, message.isOn)
+    debug('result:', result)
+    return res.status(OK).json({ data: result })
+})
+
+router.get('/light-status', async (req: RequestWithAuth, res: Response) => {
+    const { address } = req.query
+    debug('address:', address)
+    var result = await Control.DeviceLightStatus(address as string)
+    debug('result:', result)
+    return res.status(OK).json({ data: result })
+})
+
+router.post('/send-power-key', async (req: RequestWithAuth, res: Response) => {
+    const { message } = req.body
+    debug(`DeviceLightOnOff: ${message.address}`)
+    var result = await Control.DeviceSendPowerKey(message.address)
+    debug('result:', result)
+    return res.status(OK).json({ data: result })
+})
+
 export default router

@@ -36,9 +36,10 @@
           <b-button v-if="device.type==1" class="m-1" v-on:click="readLightStatus(device.address)" variant="success">
             <b-icon icon='octagon-half' aria-hidden='true'></b-icon> 경광등 상태 읽기
           </b-button>
-          <b-icon v-show="device.type==1&&lightStatus==-1" icon='x' aria-hidden='true'></b-icon>
-          <b-icon v-show="device.type==1&&lightStatus==0" icon='circle' aria-hidden='true'></b-icon>
-          <b-icon v-show="device.type==1&&lightStatus==1" icon='circle-fill' aria-hidden='true'></b-icon>
+          <b-icon v-show="device.type==1&&lightStatusMap[device.address]==-1" icon='x' aria-hidden='true'></b-icon>
+          <b-icon v-show="device.type==1&&lightStatusMap[device.address]==0" icon='circle' variant="dark" aria-hidden='true'></b-icon>
+          <b-icon v-show="device.type==1&&lightStatusMap[device.address]==1" icon='circle-fill' variant="danger" aria-hidden='true'></b-icon>
+
           <b-button v-if="device.type==1" class="m-1" v-on:click="writeLightStatus(device.address, false)" variant="success">
             <b-icon icon='toggle-off' aria-hidden='true'></b-icon> 경광등 끄기
           </b-button>
@@ -79,7 +80,7 @@ export default {
     return {
       loading: false,
       timer: null,
-      lightStatus: -1,
+      lightStatusMap: {},
       refreshInterval: 30000,
       refreshIntervals: [
         { text: '자동 갱신 미사용', value: 0 },
@@ -158,17 +159,60 @@ export default {
         console.log('SEND', message)
         let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
         if (res.data.error) {
-          this.llightStatus = -1
+           this.lightStatusMap[address]  = -1
           alert('Update error: ' + res.data.error.message)
         } else {
           // output 형식: 200 [0|1]
           let match = res.data.data.match(/(\d+) (.+)/)
           if (match[1] == 200) {
-            this.lightStatus = parseInt(match[2])
+             this.lightStatusMap[address]  = parseInt(match[2])
           } else {
             alert('경광등 상태 읽기 실패: ' + match[0])
-            this.lightStatus = -1
+             this.lightStatusMap[address]  = -1
           }
+        }
+      }
+      catch (error) {
+        alert('Request Error: ' + error.message)
+      }
+      this.loading = false
+    },
+
+    async writeLightStatusDirect(address, isOn) {
+      this.loading = true
+      try {
+        let message = { address: address, text: isOn ? 'gpio.high 12\r' : 'gpio.low 12\r' }
+        console.log('SEND', message)
+        let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
+        if (res.data.error) {
+           this.lightStatusMap[address]  = -1
+          alert('Update error: ' + res.data.error.message)
+        } else {
+          // output 형식: 200 [0|1]
+          let match = res.data.data.match(/(\d+) (.+)/)
+          if (match[1] == 200) {
+             this.lightStatusMap[address]  = parseInt(match[2])
+          } else {
+            alert('경광등 상태 쓰기 실패: ' + match[0])
+             this.lightStatusMap[address]  = -1
+          }
+        }
+      }
+      catch (error) {
+        alert('Request Error: ' + error.message)
+      }
+      this.loading = false
+    },
+
+    async readLightStatus(address) {
+      this.loading = true
+      try {
+        let res = await this.axios.get('/api/v1/actuators/light-status?address=' + address)
+        if (res.data.error) {
+          this.lightStatusMap[address] = -1
+          alert('Update error: ' + res.data.error.message)
+        } else {
+          this.lightStatusMap[address] = parseInt(res.data.data)
         }
       }
       catch (error) {
@@ -180,24 +224,46 @@ export default {
     async writeLightStatus(address, isOn) {
       this.loading = true
       try {
-        let message = { address: address, text: isOn ? 'gpio.high 12\r' : 'gpio.low 12\r' }
+        let message = { address: address, isOn: isOn }
         console.log('SEND', message)
-        let res = await this.axios.post('/api/v1/actuators/serial-write', { message: message })
+        let res = await this.axios.post('/api/v1/actuators/light-onoff', { message: message })
         if (res.data.error) {
-          this.llightStatus = -1
+           this.lightStatusMap[address]  = -1
           alert('Update error: ' + res.data.error.message)
         } else {
-          // output 형식: 200 [0|1]
           let match = res.data.data.match(/(\d+) (.+)/)
           if (match[1] == 200) {
-            this.lightStatus = parseInt(match[2])
+             this.lightStatusMap[address]  = parseInt(match[2])
           } else {
             alert('경광등 상태 쓰기 실패: ' + match[0])
-            this.lightStatus = -1
+             this.lightStatusMap[address]  = -1
           }
         }
       }
       catch (error) {
+        alert('Request Error: ' + error.message)
+      }
+      this.loading = false
+    },
+
+    async sendIRPowerKey(address) {
+      this.loading = true
+      try {
+        let message = { address: address }
+        console.log('SEND', message)
+        let res = await this.axios.post('/api/v1/actuators/send-power-key', { message: message })
+        if (res.data.error) {
+          alert('Update error: ' + res.data.error.message)
+        } else {
+          let match = res.data.data.match(/(\d+) (.+)/)
+          if (match[1] == 200) {
+          } else {
+            alert('키 전송 실패: ' + match[0])
+          }
+        }
+      }
+      catch (error) {
+        console.log(error)
         alert('Request Error: ' + error.message)
       }
       this.loading = false
@@ -231,6 +297,12 @@ export default {
   async mounted () {
     try {
       await this.fetchDevices()
+      for (let device of this.devices) {
+        if (device.type == 1) {
+          this.lightStatusMap[device.address] = -1
+          this.readLightStatus(device.address)
+        }
+      }
     } catch (error) {
       console.log('fetchDevices error: ', error)
     }

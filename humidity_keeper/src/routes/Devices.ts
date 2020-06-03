@@ -4,18 +4,23 @@ import { ParamsDictionary } from 'express-serve-static-core'
 
 import DeviceDao from '@daos/Device/DeviceDao'
 import ReadingDao from '@daos/Reading/ReadingDao'
-import Reading from '@entities/Reading';
+import RuleDao from '@daos/Rule/RuleDao'
+import Reading, { IReading } from '@entities/Reading';
 import { paramMissingError } from '@shared/constants'
-import Control, { DeviceClose } from '../control'
+import Control, {lightMap} from '../control'
 import Debug from 'debug'
 import logger from '@shared/Logger'
 import { read } from 'fs'
+import { IDevice } from '@entities/Device'
+import { IRule } from '@entities/Rule'
+import Moment from 'moment'
 
 const debug = Debug("humidity-keeper:devices")
 
 const router = Router()
 const deviceDao = new DeviceDao()
 const readingDao = new ReadingDao()
+const ruleDao = new RuleDao()
 
 const serialBaudRate = 9600
 
@@ -29,6 +34,65 @@ async function openAllActuators() {
       }
     }
   }
+}
+
+function isRuleActive(rule: IRule) : boolean {
+  let now = Moment()
+  let dayOfWeek = now.day()
+
+  if (rule.ctrlWeeks.indexOf(dayOfWeek + '') < 0) {
+    debug(`${dayOfWeek} not in ctrlWeeks`)
+    return false
+  }
+
+  let hhmmss = now.format("HH:mm:ss")
+
+  if (hhmmss < rule.ctrlBegin || hhmmss > rule.ctrlEnd) {
+    debug(`${hhmmss} not between ctrlBegin and ctrlEnd`)
+    return false
+  }
+
+  return true
+}
+
+async function checkRules(reading: IReading, device: IDevice) {
+  const rule = await ruleDao.findOne('sensorId', device.id)
+
+  if (!rule) {
+    debug(`Rule not found: sensorId=${device.id}`)
+    return
+  }
+
+  const actuatorDevice = await deviceDao.findOne('id', rule.actuatorId)
+
+  if (!actuatorDevice) {
+    debug(`Rule not found: actuatorId=${rule.actuatorId}`)
+    return
+  }
+
+  if (rule.ctrlLight) {
+    let lightOn = -1
+    if (reading.humidity < rule.humidityThreshold) {
+      lightOn = 1
+    } else if (reading.humidity + 3 > rule.humidityThreshold) {
+      lightOn = 0
+    }
+
+    if (lightOn != -1) {
+      let isOn = (lightOn == 1)
+      if (Control.DeviceNeedLightOnOff(actuatorDevice.address, isOn)) {
+        Control.DeviceLightOnOff(actuatorDevice.address, isOn)
+      }
+    }
+  }
+
+  if (rule.ctrlPower) {
+    if (!isRuleActive(rule)) {
+      debug(`Rule disabled: sensorId=${device.id}`)
+      return
+    }
+  }
+
 }
 
 // Open All Actuator
@@ -81,7 +145,10 @@ router.put('/update', async (req: Request, res: Response) => {
     const result = await deviceDao.update(device)
     if (device.type == 1 && prevDevice?.address != device.address) {
       debug(`actuator port changed: ${prevDevice?.address} -> ${device.address}`)
-      Control.DeviceClose(prevDevice?.address as string)
+      if (prevDevice?.address) {
+        if (Control.DeviceIsExist(prevDevice?.address as string))
+          Control.DeviceClose(prevDevice?.address as string)
+      }
       Control.DeviceOpen(device.address, serialBaudRate)
     }
 
@@ -124,6 +191,8 @@ router.get('/notify', async (req: Request, res: Response) => {
   reading.humidity = Number(humidity)
   reading.battery = Number(battery)
   const result = await readingDao.add(reading)
+
+  checkRules(reading, device)
 
   return res.status(OK).json({ data: result })
 })
