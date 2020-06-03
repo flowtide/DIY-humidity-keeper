@@ -2,10 +2,45 @@
 
 ## Table of contents
 
-* [Development Memo](#overview)
+* [Deployment](#deployment)
+* [Development Memo](#development)
 
-## <a name="overview"/>Development Memo
+## <a name="deployment"/>Deployment
+* Build Vuejs App
+```
+cd humidity_keeper_app
+npm install
+npm run build
+```
 
+* Build Web Service
+```
+cd humidity_keeper
+npm install
+npm run build
+```
+
+* Test Web Service
+```
+cd humidity_keeper
+npm start
+```
+
+* Register a web service as system deamon
+```
+npm install pm2 -g 
+pm2 --name humidity-keeper start npm -- start
+pm2 startup systemd
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u pi --hp /home/pi
+pm2 save
+```
+
+* Access a web service with web browser
+
+Open "http://<ip>:8000" URL.  
+Default user name is "admin" with no password.
+
+## <a name="development"/>Development Memo
 * Setup Development Environment
 ```
 npm -g install typescript
