@@ -32,7 +32,7 @@
 
     <div>
       <b-row>
-        <b-col sm="auto">
+        <b-col xl="12" lg="12" md="12" sm="12" >
           <readings-chart v-if="readings.length > 0" :chartData="chartData"></readings-chart>
         </b-col>
       </b-row>
@@ -94,21 +94,27 @@ export default {
       this.form.isDisabled = false
     },
     computeDurationByRecordCount(numReadings) {
-      let duration = 30 * 60
-      if (numReadings < 120)
-        duration = 1 * 60
-      else if (numReadings < 120 * 3)
+      // 3분에 한번씩 체크 한다고 하면 1시간에 20개 생김
+      let duration
+      if (numReadings < 20 * 3)
+        duration = 3 * 60
+      else if (numReadings < 20 * 6)
         duration = 5 * 60
-      else if (numReadings < 120 * 6)
+      else if (numReadings < 20 * 12)
         duration = 10 * 60
-      else if (numReadings < 120 * 12)
+      else if (numReadings < 20 * 24)
         duration = 15 * 60
+      else if (numReadings < 20 * 24 * 2)
+        duration = 30 * 60
+      else if (numReadings < 20 * 24 * 3)
+        duration = 60 * 60
+      else
+        duration = 180 * 60
       return duration
     },
     createChartData(readings) {
       let duration = this.computeDurationByRecordCount(readings.length)
       let samples = this.makeSamples(this.readings, duration)
-      console.log(samples)
       this.chartData.labels = _.map(samples, reading => moment(reading.created).format('DD HH:mm'))
       this.chartData.datasets = [{
           label: '온도',
@@ -130,8 +136,10 @@ export default {
       let samplingDurationMillis = samplingDuration * 1000
       for (let reading of readings) {
         let alignedTime = reading.created - (reading.created % samplingDurationMillis)
-        reduced[alignedTime] =reading
+        reduced[alignedTime] = reading
       }
+
+      console.log('samplingDuration=' + samplingDuration + " " + readings.length + "-->" + reduced.length)
 
       return _.map(reduced, (value, key) => value)
     }

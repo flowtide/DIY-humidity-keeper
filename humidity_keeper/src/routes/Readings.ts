@@ -5,6 +5,8 @@ import { ParamsDictionary } from 'express-serve-static-core'
 //import ReadingDao from '@daos/Reading/ReadingDao.mock'
 import ReadingDao from '@daos/Reading/ReadingDao'
 import { paramMissingError } from '@shared/constants'
+import Debug from "debug"
+const debug = Debug("humidity-keeper:readings")
 
 // Init shared
 const router = Router()
@@ -17,8 +19,11 @@ const readingDao = new ReadingDao()
 
 router.get('/all', async (req: Request, res: Response) => {
   const { dateFrom, dateTo, limit, orderBy, desc } = req.query
+  const orderByParam = Number(desc) ? 'DESC' : 'ASC'
+
+  debug(`desc=${desc} orderByParam=${orderByParam}`)
   const readings = await readingDao.getAll(dateFrom.toString(), dateTo.toString(),
-    Number(limit), orderBy.toString(), desc ? 'DESC' : 'ASC')
+    Number(limit), orderBy.toString(), orderByParam)
   return res.status(OK).json({data: readings})
 })
 

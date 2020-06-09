@@ -36,7 +36,26 @@ async function openAllActuators() {
   }
 }
 
-function isRuleActive(rule: IRule) : boolean {
+function isLightCtrlActive(rule: IRule) : boolean {
+  let now = Moment()
+  let dayOfWeek = now.day()
+
+  if (rule.ctrlWeeks.indexOf(dayOfWeek + '') < 0) {
+    debug(`${dayOfWeek} not in ctrlWeeks`)
+    return false
+  }
+
+  let hhmmss = now.format("HH:mm:ss")
+
+  if (hhmmss < '09:00:00' || hhmmss > '18:00:00') {
+    debug(`${hhmmss} not between working time`)
+    return false
+  }
+
+  return true
+}
+
+function isPowerCtrlActive(rule: IRule) : boolean {
   let now = Moment()
   let dayOfWeek = now.day()
 
@@ -71,42 +90,47 @@ async function checkRules(reading: IReading, device: IDevice) {
   }
 
   if (rule.ctrlLight) {
-    let lightOn = -1
-    if (reading.humidity < rule.humidityThreshold) {
-      lightOn = 1
-      debug(`lightOn humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
-    } else if (reading.humidity > rule.humidityThreshold + 4) {
-      debug(`lightOff humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
-      lightOn = 0
+    if (!isLightCtrlActive(rule)) {
+      debug(`Light Ctrl not activated: sensorId=${device.id}`)
     }
-
-    if (lightOn != -1) {
-      let isOn = (lightOn == 1)
-      if (Control.DeviceNeedLightOnOff(actuatorDevice.address, isOn)) {
-        Control.DeviceLightOnOff(actuatorDevice.address, isOn)
-        return  // 시리얼에 연속해서 보내면 안됨으로 Light 제어 수행하는 경우 바로 끝냄, 다음 리포트에 파워 제어 들어갈수 있음
+    else {
+      let lightOn = -1
+      if (reading.humidity < rule.humidityThreshold) {
+        lightOn = 1
+        debug(`lightOn humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
+      } else if (reading.humidity > rule.humidityThreshold + 4) {
+        debug(`lightOff humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
+        lightOn = 0
+      }
+  
+      if (lightOn != -1) {
+        let isOn = (lightOn == 1)
+        if (Control.DeviceNeedLightOnOff(actuatorDevice.address, isOn)) {
+          Control.DeviceLightOnOff(actuatorDevice.address, isOn)
+          return  // 시리얼에 연속해서 보내면 안됨으로 Light 제어 수행하는 경우 바로 끝냄, 다음 리포트에 파워 제어 들어갈수 있음
+        }
       }
     }
   }
 
   if (rule.ctrlPower) {
-    if (!isRuleActive(rule)) {
-      debug(`Rule disabled: sensorId=${device.id}`)
-      return
+    if (!isPowerCtrlActive(rule)) {
+      debug(`Power Ctrl not activated: sensorId=${device.id}`)
     }
-
-    if (reading.humidity > rule.humidityThreshold) {
-      return
-    }
-    let checkMoment = Moment().subtract(20, 'hours')
-    let ctrlAt = Moment(rule.ctrlAt)
-    if (!ctrlAt.isValid() || checkMoment.isAfter(ctrlAt)) {
-      debug(`DeviceSendPowerKey ${ctrlAt.format()}`)
-      Control.DeviceSendPowerKey(actuatorDevice.address)
-      rule.ctrlAt = new Date()
-      ruleDao.update(rule)
-    } else {
-      //debug(`no deed to power off ${ctrlAt.format()}`)
+    else {
+      if (reading.humidity > rule.humidityThreshold) {
+      } else {
+        let checkMoment = Moment().subtract(20, 'hours')
+        let ctrlAt = Moment(rule.ctrlAt)
+        if (!ctrlAt.isValid() || checkMoment.isAfter(ctrlAt)) {
+          debug(`DeviceSendPowerKey ${ctrlAt.format()}`)
+          Control.DeviceSendPowerKey(actuatorDevice.address)
+          rule.ctrlAt = new Date()
+          ruleDao.update(rule)
+        } else {
+          //debug(`no deed to power off ${ctrlAt.format()}`)
+        }
+      }
     }
   }
 

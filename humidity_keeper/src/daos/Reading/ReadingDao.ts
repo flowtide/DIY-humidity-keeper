@@ -24,8 +24,9 @@ class ReadingDao implements IReadingDao {
 
         query = query.where('created', '>=', from).andWhere('created', '<=', to)
         // orderBy('name', 'desc')
-        if (orderBy)
+        if (orderBy) {
             query = query.orderBy(orderBy, orderByParam)
+        }
 
         if (limit > 0)
             query = query.limit(limit).offset(0)

@@ -10,7 +10,7 @@ export default {
   ],
   mounted () {
     console.log('chartData:', this.chartData)
-    this.renderChart(this.chartData, {responsive: true, maintainAspectRatio: true})
+    this.renderChart(this.chartData, {responsive: true, maintainAspectRatio: false})
   }
 }
 

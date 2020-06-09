@@ -16,8 +16,8 @@
 
   <div v-if="!loading" class="rules-view-container">
     <br>
-    <b-row v-bind:key="rule.id" v-for="rule in rules">
-      <b-col xl="4" lg="6" md="12" sm="12">
+    <b-row>
+      <b-col xl="4" lg="6" md="12" sm="12" v-bind:key="rule.id" v-for="rule in rules">
         <b-card class="m-2" header-tag="header" footer-tag="footer" bg-variant="light">
           <template v-slot:header>
             <h3 class="mb-0">{{rule.name}}</h3>

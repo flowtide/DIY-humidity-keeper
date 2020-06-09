@@ -23,8 +23,8 @@
 
   <div v-if="!loading" class="devices-view-container">
     <br>
-    <b-row v-bind:key="device.id" v-for="device in devices">
-      <b-col xl="4" lg="6" md="12" sm="12">
+    <b-row>
+      <b-col xl="4" lg="4" md="6" sm="12" v-bind:key="device.id" v-for="device in devices">
         <b-card class="m-2" header-tag="header" footer-tag="footer" bg-variant="light">
           <template v-slot:header>
             <h3 class="mb-0">{{device.name}}</h3>
@@ -111,7 +111,7 @@ export default {
           if (device.type == 0) {
             let res = await this.axios.get('/api/v1/readings/recent-data?deviceId='+ device.id)
             device.reading = res.data.data
-            //console.log(device.id, device.reading)
+            this.$forceUpdate()
           }
         }
       } catch (error) {
@@ -289,7 +289,7 @@ export default {
 
     formatUpdateAt(updateAt) {
       var mtime = moment(updateAt)
-      if (mtime.isAfter(moment().subtract(2, 'days')))
+      if (mtime.isAfter(moment().subtract(1, 'days')))
         return mtime.fromNow() + ' 갱신됨' 
       else
         return mtime.format('MM-DD hh:mm') + ' 갱신됨' 
