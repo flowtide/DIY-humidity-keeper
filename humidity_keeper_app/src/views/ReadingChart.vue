@@ -33,7 +33,7 @@
     <div>
       <b-row>
         <b-col xl="12" lg="12" md="12" sm="12" >
-          <readings-chart v-if="readings.length > 0" :chartData="chartData"></readings-chart>
+          <readings-chart v-if="readings.length > 0" :chartData="chartData" :chartOptions="chartOptions"></readings-chart>
         </b-col>
       </b-row>
     </div>
@@ -56,16 +56,16 @@ export default {
       },
       readings: [],
       chartData: {},
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false
+      },
       form: {
         dateFrom: moment().subtract(0, 'day').format('YYYY-MM-DD'),
         dateTo: moment().format('YYYY-MM-DD'),
         isDisabled: false
       }
     }
-  },
-  chartOptions: {
-    responsive: true,
-    maintainAspectRatio: true
   },
   components: {
     readingsChart,
@@ -107,14 +107,17 @@ export default {
       else if (numReadings < 20 * 24 * 2)
         duration = 30 * 60
       else if (numReadings < 20 * 24 * 3)
+        duration = 45 * 60
+      else if (numReadings < 20 * 24 * 7)
         duration = 60 * 60
       else
-        duration = 180 * 60
+        duration = 90 * 60
       return duration
     },
     createChartData(readings) {
       let duration = this.computeDurationByRecordCount(readings.length)
       let samples = this.makeSamples(this.readings, duration)
+      this.chartData = {} // it is important to set new object
       this.chartData.labels = _.map(samples, reading => moment(reading.created).format('DD HH:mm'))
       this.chartData.datasets = [{
           label: '온도',

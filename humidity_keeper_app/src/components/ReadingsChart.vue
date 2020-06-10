@@ -5,12 +5,19 @@ export default {
   extends: Line,
   name: 'readingChart',
   mixins: [mixins.reactiveProp],
-  props: [
-    'chartData',
-  ],
+  // Below 'chartData' prop don't need due to mixins will do it.
+  props: ['chartOptions'],
+  methods: {
+  },
+  watch: {
+    chartData: function() {
+      console.log('watch:')
+      this.renderChart(this.chartData, this.chartOptions)
+    }
+  },
   mounted () {
-    console.log('chartData:', this.chartData)
-    this.renderChart(this.chartData, {responsive: true, maintainAspectRatio: false})
+    console.log('mounted:', this.chartData)
+    this.renderChart(this.chartData, this.chartOptions)
   }
 }
 
