@@ -4,6 +4,7 @@ export interface IRule {
     sensorId: string
     actuatorId: string
     humidityThreshold: number
+    humidityHighThreshold: number
     ctrlLight: boolean
     ctrlPower: boolean
     ctrlBegin: string
@@ -19,6 +20,7 @@ export interface IRule {
     public sensorId: string
     public actuatorId: string
     public humidityThreshold: number
+    public humidityHighThreshold: number
     public ctrlLight: boolean
     public ctrlPower: boolean
     public ctrlBegin: string
@@ -34,6 +36,7 @@ export interface IRule {
             this.actuatorId = ''
             this.ctrlLight = false
             this.humidityThreshold = -1
+            this.humidityHighThreshold = -1
             this.ctrlPower = false
             this.ctrlBegin = ''
             this.ctrlEnd = ''
@@ -46,6 +49,7 @@ export interface IRule {
             this.actuatorId = device.actuatorId
             this.ctrlLight = device.ctrlLight
             this.humidityThreshold = device.humidityThreshold
+            this.humidityHighThreshold = device.humidityHighThreshold
             this.ctrlPower = device.ctrlPower
             this.ctrlBegin = device.ctrlBegin
             this.ctrlEnd = device.ctrlEnd

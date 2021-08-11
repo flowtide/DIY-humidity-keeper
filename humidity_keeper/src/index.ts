@@ -22,6 +22,7 @@ dbHandle.then((knexInstance) => {
     })
 
     app.listen(Server.port, () => {
+        console.log(`Web server started on port: ${Server.port}`)
         logger.info(`Web server started on port: ${Server.port}`);
     })
 }).catch((error) => {

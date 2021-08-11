@@ -24,6 +24,20 @@ const ruleDao = new RuleDao()
 
 const serialBaudRate = 9600
 
+const Alarm_Off = 0
+const Alarm_LowOn = 1
+const Alarm_HighOn = 2
+const alarmMap = new Map()
+
+function getAlarmStatus(ruleId: string) : number {
+  let status = alarmMap.get(ruleId)
+  return status === undefined ? Alarm_Off : status as number
+}
+
+function setAlarmStatus(ruleId: string, status: number) {
+  alarmMap.set(ruleId, status)
+}
+
 async function openAllActuators() {
   const devices = await deviceDao.getAll()
   for (let device of devices) {
@@ -74,6 +88,14 @@ function isPowerCtrlActive(rule: IRule) : boolean {
   return true
 }
 
+function controlLight(deviceAddr: string, isOn: boolean) : boolean {
+  if (Control.DeviceNeedLightOnOff(deviceAddr, isOn)) {
+    Control.DeviceLightOnOff(deviceAddr, isOn)
+    return true
+  }
+  return false
+}
+
 async function checkRules(reading: IReading, device: IDevice) {
   const rule = await ruleDao.findOne('sensorId', device.id)
 
@@ -90,24 +112,44 @@ async function checkRules(reading: IReading, device: IDevice) {
   }
 
   if (rule.ctrlLight) {
+    let alarmStatus = getAlarmStatus(rule.id)
     if (!isLightCtrlActive(rule)) {
+      if (alarmStatus != Alarm_Off) {
+        console.log(`rule=${rule.name} -> alarm OFF in inactive period`)
+        controlLight(actuatorDevice.address, false)
+        setAlarmStatus(rule.id, Alarm_Off)
+      }
       debug(`Light Ctrl not activated: sensorId=${device.id}`)
     }
-    else {
-      let lightOn = -1
-      if (reading.humidity < rule.humidityThreshold) {
-        lightOn = 1
-        debug(`lightOn humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
-      } else if (reading.humidity > rule.humidityThreshold + 4) {
-        debug(`lightOff humidity=${reading.humidity} humidity=${rule.humidityThreshold}`)
-        lightOn = 0
+    else if (alarmStatus == Alarm_LowOn) {
+      if (reading.humidity > rule.humidityThreshold + 3) {
+        // 습도 하한 알람 해제 조건이 됨
+        debug(`lightOff humidity=${reading.humidity} lowThreshold=${rule.humidityThreshold}`)
+        if (controlLight(actuatorDevice.address, false)) {
+          setAlarmStatus(rule.id, Alarm_Off)
+        }
       }
-  
-      if (lightOn != -1) {
-        let isOn = (lightOn == 1)
-        if (Control.DeviceNeedLightOnOff(actuatorDevice.address, isOn)) {
-          Control.DeviceLightOnOff(actuatorDevice.address, isOn)
-          return  // 시리얼에 연속해서 보내면 안됨으로 Light 제어 수행하는 경우 바로 끝냄, 다음 리포트에 파워 제어 들어갈수 있음
+    } else if (alarmStatus == Alarm_HighOn) {
+      if (reading.humidity < rule.humidityHighThreshold - 3) {
+        // 습도 상한 알람 해제 조건이 됨
+        debug(`lightOff humidity=${reading.humidity} highThreshold=${rule.humidityHighThreshold}`)
+        if (controlLight(actuatorDevice.address, false)) {
+          setAlarmStatus(rule.id, Alarm_Off)
+        }
+      }
+    } else {
+      if (reading.humidity < rule.humidityThreshold) {
+        // 습도 하한 알람 발생 조건이 됨
+        debug(`lightOn humidity=${reading.humidity} lowThreshold=${rule.humidityThreshold}`)
+        if (controlLight(actuatorDevice.address, true)) {
+          setAlarmStatus(rule.id, Alarm_LowOn)
+        }
+      }
+      else if (reading.humidity > rule.humidityHighThreshold) {
+        // 습도 상한 알람 발생 조건이 됨
+        debug(`lightOn humidity=${reading.humidity} highThreshold=${rule.humidityHighThreshold}`)
+        if (controlLight(actuatorDevice.address, true)) {
+          setAlarmStatus(rule.id, Alarm_HighOn)
         }
       }
     }

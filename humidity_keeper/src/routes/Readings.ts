@@ -22,8 +22,8 @@ router.get('/all', async (req: Request, res: Response) => {
   const orderByParam = Number(desc) ? 'DESC' : 'ASC'
 
   debug(`desc=${desc} orderByParam=${orderByParam}`)
-  const readings = await readingDao.getAll(dateFrom.toString(), dateTo.toString(),
-    Number(limit), orderBy.toString(), orderByParam)
+  const readings = await readingDao.getAll(dateFrom as string, dateTo as string,
+    Number(limit), orderBy as string, orderByParam)
   return res.status(OK).json({data: readings})
 })
 
@@ -40,7 +40,7 @@ router.get('/recent-data', async (req: Request, res: Response) => {
 
 router.delete('/delete-range', async (req: Request, res: Response) => {
   const { fromDate, toDate } = req.query
-  const result = await readingDao.deleteRange(fromDate.toString(), toDate.toString())
+  const result = await readingDao.deleteRange(fromDate as string, toDate as string)
   return res.status(OK).json({ data: result })
 })
 

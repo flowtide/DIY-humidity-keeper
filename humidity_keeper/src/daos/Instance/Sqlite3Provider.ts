@@ -61,6 +61,7 @@ export async function create () {
         table.uuid('sensorId').notNullable()
         table.uuid('actuatorId').notNullable()
         table.float('humidityThreshold')
+        table.float('humidityHighThreshold')
         table.boolean('ctrlLight').defaultTo(false)
         table.boolean('ctrlPower').defaultTo(false)
         table.string('ctrlBegin')

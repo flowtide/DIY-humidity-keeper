@@ -14,4 +14,25 @@ router.post('/serial-write', (req, res) => tslib_1.__awaiter(void 0, void 0, voi
     debug('result:', result);
     return res.status(http_status_codes_1.OK).json({ data: result });
 }));
+router.post('/light-onoff', (req, res) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const { message } = req.body;
+    debug(`DeviceLightOnOff: ${message.address} -> ${message.isOn}`);
+    var result = yield control_1.default.DeviceLightOnOff(message.address, message.isOn);
+    debug('result:', result);
+    return res.status(http_status_codes_1.OK).json({ data: result });
+}));
+router.get('/light-status', (req, res) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const { address } = req.query;
+    debug('address:', address);
+    var result = yield control_1.default.DeviceLightStatus(address);
+    debug('result:', result);
+    return res.status(http_status_codes_1.OK).json({ data: result });
+}));
+router.post('/send-power-key', (req, res) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const { message } = req.body;
+    debug(`DeviceLightOnOff: ${message.address}`);
+    var result = yield control_1.default.DeviceSendPowerKey(message.address);
+    debug('result:', result);
+    return res.status(http_status_codes_1.OK).json({ data: result });
+}));
 exports.default = router;

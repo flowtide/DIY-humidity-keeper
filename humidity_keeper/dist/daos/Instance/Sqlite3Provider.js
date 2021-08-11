@@ -47,6 +47,24 @@ function create() {
                     table.foreign('deviceId').references('devices.id');
                 });
             }
+            if (!(yield knex.schema.hasTable('rules'))) {
+                debug("table creating: 'rules'");
+                yield knex.schema.createTable('rules', (table) => {
+                    table.uuid('id').notNullable().primary();
+                    table.string('name').notNullable();
+                    table.uuid('sensorId').notNullable();
+                    table.uuid('actuatorId').notNullable();
+                    table.float('humidityThreshold');
+                    table.float('humidityHighThreshold');
+                    table.boolean('ctrlLight').defaultTo(false);
+                    table.boolean('ctrlPower').defaultTo(false);
+                    table.string('ctrlBegin');
+                    table.string('ctrlEnd');
+                    table.string('ctrlWeeks');
+                    table.dateTime('ctrlAt');
+                    table.foreign('sensorId').references('devices.id');
+                });
+            }
             if (!(yield knex.schema.hasTable('users'))) {
                 debug("table creating: 'users'");
                 yield knex.schema.createTable('users', (table) => {

@@ -30,7 +30,6 @@ class SerialActuator {
         this.parser = this.port.pipe(new parser_readline_1.default({ delimiter: '\r' }));
         debug('open ok');
         this.parser.on('data', (data) => {
-            debug('Serial Data: ', data);
             em.emit('dataReady', data);
         });
     }

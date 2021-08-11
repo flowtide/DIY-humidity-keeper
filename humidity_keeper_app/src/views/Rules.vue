@@ -22,7 +22,7 @@
           <template v-slot:header>
             <h3 class="mb-0">{{rule.name}}</h3>
           </template>
-          <b-card-text v-if="rule.humidityThreshold">설정 습도: {{rule.humidityThreshold}}</b-card-text>
+          <b-card-text v-if="rule.humidityThreshold">설정 습도: {{rule.humidityThreshold}} ~ {{rule.humidityHighThreshold}} %</b-card-text>
           <b-card-text v-if="!rule.ruleAt" v-show="rule.ctrlAt"> 최근 동작 시간: {{formatUpdateAt(rule.ctrlAt)}}</b-card-text>
           <template v-slot:footer>
             <b-button class="m-1" v-on:click="goRuleEditPage(rule.id)" variant="info">

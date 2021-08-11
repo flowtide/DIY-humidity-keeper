@@ -22,6 +22,7 @@ exports.promise = (middleware) => ((req, res, next) => tslib_1.__awaiter(void 0,
 }));
 exports.authenticate = (req, res, next) => {
     let token = (req.headers['x-access-token'] || req.headers['authorization']);
+    debug(`token=${token}`);
     if (token.startsWith('Bearer ')) {
         token = token.slice(7, token.length);
     }
