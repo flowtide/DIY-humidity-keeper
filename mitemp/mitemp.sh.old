@@ -1,0 +1,15 @@
+set -x
+#python3 demo.py backend
+
+MAC="58:2d:34:38:1f:e4"
+
+sleep 15
+while true
+do
+  date
+  python3 /home/pi/src/mitemp/demo.py upload $MAC localhost:8000
+  sleep 3
+  /etc/init.d/bluetooth restart
+  sleep 3
+done
+
